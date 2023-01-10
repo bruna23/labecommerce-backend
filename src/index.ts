@@ -1,3 +1,8 @@
-const nome = process.argv[2]
+import { users } from "./database"
+import { product } from "./database"
+import { purchase } from "./database"
 
-console.log(`Olá, meu nome é ${nome}`)
+//console.log(users, product, purchase)
+
+
+console.log("usuarios:\n", users, "produtos:\n", product, "compra realizada pelo cliente:\n", purchase )

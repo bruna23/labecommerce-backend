@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "description": "**Vamos utilizar esse repositório para as práticas da aula!**",
   "main": "index.js",
-  "type": "module",
+
   "scripts": {
     
+   
     "start": "tsc && node ./build/index.js",
-    "start-par-impar": "tsc && node ./build/par-ou-impar.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
+   
    
   },
   "repository": {

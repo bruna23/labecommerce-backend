@@ -1,94 +1,93 @@
-import { 
-    acessarProductId, 
-    users,
-    products ,
-    acessarProductsName,
-    createPurchase,
-    getAllPurchasesFromUserId, 
-    purchases
-} from "./database";
-import cors from 'cors'
+import { TUser, TProduct, TPurchase , PRODUCT_CATEGORY } from "./types"
 
-//importando o express 👇🏽
-import express, { Request, Response } from 'express'
-import { TProduct, TUser, TPurchase  } from "./types";
+export const users : TUser[] = [
+    {
+        id: "1",
+        email: "bruna@mail.com",
+        password: "123sdsadc"
+    },
+    {
+        id: "2",
+        email: "julio@mail.com",
+        password: "a4dsfd56"
+    }
+];
 
-//invocando a função express() dentro da variável app 👇🏽
-const app = express();// console.log(acessarProductsName("mouse"));
-// console.log(createPurchase("1", "1", 3, 15));
-app.use(express.json())
-app.use(cors())
+export const products : TProduct[] = [
+    {
+        id: "1",
+        name: "Sunscreen",
+        price: 5,
+        category: PRODUCT_CATEGORY.ACCESSORIES
+    },
+    {
+        id: "2",
+        name: "Sneakers",
+        price: 15,
+        category: PRODUCT_CATEGORY.CLOTHES_AND_SHOES
+    },
+   
+]
 
-app.listen(3003, () => {
-    console.log("Servidor rodando na porta 3003")
-})
+export const purchases : TPurchase[] = [
+    {
+        userId: "1",
+        productId: "1",
+        quantity: 1,
+        totalPrice: 5
+    },
+    {
+        userId: "2",
+        productId: "2",
+        quantity: 2,
+        totalPrice: 30
+    }
+]
 
-app.get("/users", (req: Request, res: Response) => {
-res.status(200).send(users)
-})
-app.get("/products", (req: Request, res: Response) => {
-    res.status(200).send( products )
+export function createUser(id : string, email : string, password : string) : string{
+    users.push({
+        id,
+        email,
+        password
+    });
+    return ("Cadastro realizado com sucesso");
+}
+
+export function getAllUsers() : TUser[]{
+    return users;
+}
+
+export function createProduct(id : string, name : string, price : number, category : PRODUCT_CATEGORY) : string{
+    products.push({
+        id,
+        name,
+        price,
+        category
     })
-app.get("/product/search", (req:Request, res: Response)=>{
-        const q= req.query.q as string
-         const productsFilter=products.filter((product)=>product.name.includes(q))
-     res.status(200).send(productsFilter)
-     })
+    return ("Produto criado com sucesso");
+}
+export function acessarProducts() : TProduct[]{
+    return products;
+}
 
-     //Criando novo usuário
+export function acessarProductId(id : string) : (undefined | TProduct){
+    return products.find(product => product.id === id);
+}
 
-     app.post("/users", (req: Request, res: Response )=>{
-        const id = req.body.id
-        const email = req.body.email
-        const password = req.body.password
+export function acessarProductsName(q : string) : TProduct[]{
+    return products.filter(product => product.name.toLowerCase().includes(q.toLowerCase()));
+}
 
-
-
-        const newUser: TUser ={
-            id,
-            email,
-            password,
-
-        }
-    users.push(newUser)
-    res.status(201).send("Cadastro realizado com sucesso")
+export function createPurchase(userId : string, productId : string, quantity : number, totalPrice : number) : string{
+    purchases.push({
+        userId,
+        productId,
+        quantity,
+        totalPrice
     })
+    return ("Compra realizada com sucesso");
+}
 
-    //Criando novo produto com o POST
-    app.post("/products", (req: Request, res: Response )=>{
-        const id = req.body.id
-        const name = req.body.name
-        const price = req.body.price
-        const category = req.body.category
-
-
-
-
-        const newProduct: TProduct ={
-            id,
-            name,
-            price,
-            category
-
-        }
-    products.push(newProduct)
-    res.status(201).send("Produto cadastrado com sucesso")
-    })
-//Compra criada com o POST
-
-app.post("/purchase", (req:Request, res:Response)=>{
-    const userId= req.body.userId
-    const productId=req.body.productId
-    const quantity= req.body.quantity
-    const totalPrice= req.body.totalPrice
-
-  const newPurchase: TPurchase ={userId, productId, quantity, totalPrice}
-  purchases.push(newPurchase)
-  res.status(201).send("Compra realizada com sucesso")
-
-  })
-
-
-  const nome = process.argv[2]
-
-console.log(Olá, meu nome é ${nome})
+export function getAllPurchasesFromUserId(userIdToSearch : string) : TPurchase[]{
+    return purchases.filter(purchase => purchase.userId === userIdToSearch);
+}

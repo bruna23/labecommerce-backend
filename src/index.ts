@@ -1,7 +1,8 @@
+import { db } from './database/knex'
+
 import { 
     users,
-    products ,
-
+    products,
     purchases
 } from "./database";
 import cors from 'cors'
@@ -50,7 +51,7 @@ app.get("/products", (req: Request, res: Response) => {
   
 //query params deve possuir pelo menos um caractere
     
-app.get("/product/search", (req: Request, res: Response) => {
+app.get("/product/search",async (req: Request, res: Response) => {
     let productFilter;
     try {
       const q = req.query.q as string;
@@ -59,11 +60,12 @@ app.get("/product/search", (req: Request, res: Response) => {
         res.status(400);
         throw new Error("query params deve possuir pelo menos um caractere");
       }
-  
-      productFilter = products.filter((product) => {
-        return product.name.toLowerCase().includes(q.toLowerCase());
-      });
-      res.status(200).send(productFilter);
+  //
+  const [product]= await db.raw(`
+  SELECT * FROM products
+  WERE LOWER(name) LIKE("%${q}%")
+  `)
+   res.status(200).send({product: product});
     } catch (error: any) {
       console.log(error);
   
@@ -85,7 +87,6 @@ app.post("/users", (req: Request, res: Response) => {
       const id = req.body.id;
       const email = req.body.email;
       const password = req.body.password;
-  
       const findId = users.find((user) => user.id === id);
   
       if (findId) {
@@ -305,15 +306,240 @@ app.delete("/users/:id", (req: Request, res: Response)=>{
     resultToEdit.id=newId || resultToEdit.id
     resultToEdit.name=newName || resultToEdit.name
     resultToEdit.price = isNaN(newPrice) ?  resultToEdit.price : newPrice
-    resultToEdit.category=newCategory || resultToEdit.category
-
-
-
-   
-    
+    resultToEdit.category=newCategory || resultToEdit.category    
             }
             res.status(200).send("Produto atualizado com sucesso")
-    
         })
-            
+            //knex exercicio 01
+            //Configure seu servidor Express para que ele se comunique com seu banco de dados via knex
+            // e refatore (ou recrie) os seguintes endpoints:
 
+//users
+        app.get("/users", async (req: Request, res: Response) => {
+          try {
+            const result = await db.raw(`
+            SELECT * FROM users;`)
+      res.status(200).send({users: result})
+        } catch (error) {
+            console.log(error)
+      
+            if (req.statusCode === 200) {
+                res.status(500)
+            }
+      
+            if (error instanceof Error) {
+                res.send(error.message)
+            } else {
+                res.send("Erro inesperado")
+            }
+        }
+      })
+//products
+
+
+          app.get("/products", async (req: Request, res: Response) => {
+            try{
+              const result = await db.raw(`
+              SELECT * FROM products;`)
+        res.status(200).send({products: result})
+          } catch (error) {
+              console.log(error)
+        
+              if (req.statusCode === 200) {
+                  res.status(500)
+              }
+        
+              if (error instanceof Error) {
+                  res.send(error.message)
+              } else {
+                  res.send("Erro inesperado")
+              }
+          }
+        })
+
+        
+//exercicio 02
+app.post("/users", async(req: Request, res: Response)=>{
+  try{
+      const {id, email, password}= req.body
+      if(typeof id !== "string"){
+          res.status(400)
+          throw new Error("'id' inválido, deve ser uma string");
+          
+      }
+      if(typeof email !== "string"){
+          res.status(400)
+          throw new Error("'email' inválido, deve ser uma string");
+          
+      }
+      if(typeof password !== "string"){
+        res.status(400)
+        throw new Error("'password' inválido, deve ser uma string");
+        
+    }
+      if(id.length <1 || email.length < 1 || password.length <2){
+          res.status(400)
+          throw new Error("'id' ou 'email' devem ter no minímo 1 caractere");
+          
+      }
+      await db.raw(`
+      INSERT INTO users(id, email, password)
+      VALUES("${id}", "${email}", ${password});`)
+      res.status(200).send(`usuário cadastrada com sucesso`)
+  }catch (error) {
+      console.log(error)
+
+      if (req.statusCode === 200) {
+          res.status(500)
+      }
+
+      if (error instanceof Error) {
+          res.send(error.message)
+      } else {
+          res.send("Erro inesperado")
+      }}
+});
+app.post("/products", async(req: Request, res: Response) => {
+  try {
+    const id = req.body.id;
+    const name = req.body.name;
+    const price = req.body.price;
+    const category = req.body.category;
+
+    const findId = products.find((product) => product.id === id);
+
+    if (findId) {
+      res.status(400);
+      throw new Error("ID indisponivel");
+    }
+
+    const newProduct: TProduct = {
+      id,
+      name,
+      price,
+      category,
+    };
+    await db.raw(`
+    INSERT INTO products(id, name, price, category)
+    VALUES("${id}", "${name}", "${price}", " "${category}"");`)
+
+    products.push(newProduct);
+    res.status(201).send("Produto criado com sucesso 😎");
+  } catch (error: any) {
+    console.log(error);
+
+    if (res.statusCode === 200) {
+      res.status(500);
+    }
+
+    res.send(error.message);
+  }
+});
+app.post("/purchases", async (req: Request, res: Response) => {
+  try {
+    const { id, total_price, paid, delivered_at, buyer_id } = req.body;
+
+    if (typeof id != "string") {
+      res.status(400);
+      throw new Error("'id' invalido, deve ser uma string");
+    }
+
+    if (typeof delivered_at != "string") {
+      res.status(400);
+      throw new Error("'delivered_at' invalido, deve ser uma string");
+    }
+
+    if (typeof buyer_id != "string") {
+      res.status(400);
+      throw new Error("'buyer_id' invalido, deve ser uma string");
+    }
+
+    if (typeof total_price != "number") {
+      res.status(400);
+      throw new Error("'total_price' invalido, deve ser um number");
+    }
+
+    if (paid > 1 && paid < 0) {
+      res.status(400);
+      throw new Error("'paid' invalido, deve ser 0 ou 1");
+    }
+
+    if (
+      id.length < 1 ||
+      paid.length < 1 ||
+      delivered_at.length < 1 ||
+      buyer_id.length < 1
+    ) {
+      res.status(400);
+      throw new Error("As informações devem ter no minimo 1 caractere");
+    }
+
+    await db.raw(`
+      INSERT INTO purchases (id, total_price, paid, delivered_at, buyer_id)
+      VALUES ("${id}", "${total_price}", "${paid}", "${delivered_at}", "${buyer_id}")
+    `);
+
+    res.status(200).send(`Compra cadastrada com sucesso`);
+  } catch (error: any) {
+    console.log(error);
+
+    if (res.statusCode === 200) {
+      res.status(500);
+    }
+
+    res.send(error.message);
+  }
+});
+
+app.get("/products/:id", async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+
+    const [product] = await db.raw(`
+      SELECT * FROM products
+      WHERE id = "${id}"
+    `);
+
+    if (!product) {
+      res.status(400);
+      throw new Error("Produto não encontrado");
+    }
+
+    res.status(200).send({ product: product });
+  } catch (error: any) {
+    console.log(error);
+
+    if (res.statusCode === 200) {
+      res.status(500);
+    }
+
+    res.send(error.message);
+  }
+});
+
+app.get("/users/:id/purchases", async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+
+    const purchases = await db.raw(`
+      SELECT * FROM purchases
+      WHERE buyer_id = "${id}"
+    `);
+
+    res.status(200).send({ purchases: purchases });
+  } catch (error: any) {
+    console.log(error);
+
+    if (res.statusCode === 200) {
+      res.status(500);
+    }
+
+    res.send(error.message);
+  }
+});
+
+
+        
+
+        
+        

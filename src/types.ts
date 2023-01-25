@@ -23,3 +23,5 @@ export type TUser = {
     CLOTHES_AND_SHOES = "Roupas",
     ELECTRONICS = "Eletrônicos"
   }
+
+  

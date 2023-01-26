@@ -122,6 +122,8 @@ CREATE TABLE purchases(
      FOREIGN KEY (buyer_id) REFERENCES users (id)
 );
 
+DELETE FROM purchases_products;
+
 INSERT INTO purchases(id, total_price, paid, delivered_at, buyer_id)
 VALUES ("pr006", 5000, 0, "", "001"),
 ("pr007", 1000, 0, "", "002"),
@@ -137,6 +139,40 @@ INNER JOIN users
 ON purchases.buyer_id=users.id
 WHERE users.id= "001";
 
+CREATE TABLE purchases_products (
+	purchase_id TEXT NOT NULL, 
+	product_id TEXT NOT NULL, 
+	quantity INTEGER NOT NULL,
+	FOREIGN KEY (purchase_id) REFERENCES purchases(id)
+	FOREIGN KEY (product_id) REFERENCES products(id)
+
+
+);
+INSERT INTO purchases_products(purchase_id, product_id, quantity)
+VALUES
+("001", "a03", 1),
+("002", "a03", 2),
+("003", "a03", 3);
+DROP TABLE purchases_products;
+
+SELECT * FROM purchases
+INNER JOIN  purchases_products  
+ON  purchases_products.purchase_id =purchases.id
+;
+SELECT 
+purchases.id AS purchaseId,
+purchases.total_price, 
+purchases.paid,
+purchases.delivered_at, 
+purchases.buyer_id AS buyerId,
+products.id, 
+products.name,
+products.price
+FROM purchases
+LEFT JOIN purchases_products
+ON purchases_products.purchase_id = purchases.id
+INNER JOIN products
+ON  purchases_products.product_id = products.id;
 
 
 

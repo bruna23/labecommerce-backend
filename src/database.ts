@@ -2,39 +2,39 @@ import { TUser, TProduct, TPurchase , PRODUCT_CATEGORY } from "./types"
 
 export const users : TUser[] = [
     {
-        id: "1",
-        email: "bruna@mail.com",
-        password: "123sdsadc"
+        id: "a001",
+        email: "brunavgmail.com",
+        password: "brunav155123"
     },
     {
-        id: "2",
-        email: "julio@mail.com",
-        password: "a4dsfd56"
+        id: "a002",
+        email: "alant@gmail.com",
+        password: "AlanT1359"
     },
     {
-        id: "3",
-        email: "bianca@mail.com",
-        password: "bia24524"
+        id: "a003",
+        email: "Pedrohgth@gmail.com",
+        password: "Pedro15897"
     }
 ];
 
 export const products : TProduct[] = [
     {
         id: "1",
-        name: "Sunscreen",
-        price: 5,
+        name: "choker",
+        price: 90,
         category: PRODUCT_CATEGORY.ACCESSORIES
     },
     {
         id: "2",
         name: "Sneakers",
-        price: 15,
+        price: 225,
         category: PRODUCT_CATEGORY.CLOTHES_AND_SHOES
     },
     {
         id: "3",
         name: "Shoes",
-        price: 100,
+        price: 120,
         category: PRODUCT_CATEGORY.CLOTHES_AND_SHOES
     },
    
